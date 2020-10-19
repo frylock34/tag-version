@@ -18,6 +18,27 @@ outLog() {
 	echo "$1"
 } >&2
 
+initializeGit() {
+	log "Initializing git ...";
+	
+	local version="$(git --version)";
+	if [  "$?" -ne "0" ]; then
+		log "Git not installed. Installing ...";
+		apt install git;
+		local version="$(git --version)";
+	else
+		log "Git already installed.";
+	fi
+	
+	log "$version"
+	
+	git config --global user.name "$(git show -s --format="%an" HEAD)";
+	git config --global user.email "$(git show -s --format="%ae" HEAD)";
+	
+	git fetch;
+	log "Git initialized successfully!";
+}
+
 getLatestRevision() {
 	outLog "Getting latest tagged revision ...";
 	if [ "$(git tag -l *latest* | wc -l)" -eq "0" ]; then
@@ -210,6 +231,8 @@ pushToOrigin() {
 
 	outLog "Push successful.";
 }
+
+initializeGit;
 
 outLog "Production Branch: $PROD_BRANCH";
 outLog "Test Branch: $TEST_BRANCH";
